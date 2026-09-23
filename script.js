@@ -1,4 +1,18 @@
-const API_URL = 'http://localhost:8080/api/books';
+/* =========================================================
+   API CONFIGURATION
+   Local:      http://localhost:8080/api/books
+   Production: https://borrowbox-backend-XXXX.onrender.com/api/books
+   Auto-detect based on browser hostname.
+   ========================================================= */
+const API_CONFIG = {
+    LOCAL: 'http://localhost:8080/api/books',
+    PRODUCTION: 'https://borrowbox-backend-imbv.onrender.com/api/books'  // ← তোমার Render URL
+};
+
+const IS_LOCAL = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+const API_URL = IS_LOCAL ? API_CONFIG.LOCAL : API_CONFIG.PRODUCTION;
+
+console.log('[BorrowBox] API URL:', API_URL);
 
 // Basic auth credentials for protected operations (POST/PUT/DELETE)
 const AUTH_HEADER = 'Basic ' + btoa('admin:admin123');
