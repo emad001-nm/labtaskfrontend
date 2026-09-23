@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BorrowBox — Library Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>📚 BorrowBox</h1>
+        <p>Manage your library collection</p>
+    </header>
+
+    <main>
+        <!-- Form -->
+        <section class="card">
+            <h2 id="formTitle">Add New Book</h2>
+            <form id="bookForm">
+                <input type="hidden" id="bookId">
+                <input type="text" id="title" placeholder="Title" required>
+                <input type="text" id="author" placeholder="Author" required>
+                <input type="text" id="isbn" placeholder="ISBN (10 or 13 digits)" required>
+                <input type="text" id="category" placeholder="Category" required>
+                <input type="number" id="totalCopies" placeholder="Total Copies" min="1" required>
+                <input type="number" id="availableCopies" placeholder="Available Copies" min="0" required>
+                <div class="actions">
+                    <button type="submit" class="btn primary">Save</button>
+                    <button type="button" class="btn secondary" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Book List -->
+        <section class="card">
+            <h2>All Books</h2>
+            <div id="bookList" class="book-list">Loading...</div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
