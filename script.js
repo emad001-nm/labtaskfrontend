@@ -6,7 +6,7 @@
    ========================================================= */
 const API_CONFIG = {
     LOCAL: 'http://localhost:8080/api/books',
-    PRODUCTION: 'https://borrowbox-backend-imbv.onrender.com/api/books'  // ← তোমার Render URL
+    PRODUCTION: 'https://labtaskbackend.onrender.com/api/books'
 };
 
 const IS_LOCAL = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
