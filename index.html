@@ -3,42 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BorrowBox — Modern library management system">
     <title>BorrowBox — Library Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>📚 BorrowBox</h1>
-        <p>Manage your library collection</p>
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-icon">📚</div>
+                <div class="brand-text">
+                    <span class="brand-name">BorrowBox</span>
+                    <span class="brand-tagline">Library Management</span>
+                </div>
+            </div>
+            <div class="nav-status">
+                <span id="apiStatus" class="status-dot offline"></span>
+                <span id="apiStatusText">Connecting...</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO HEADER ========== -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Library Dashboard</h1>
+            <p>Manage your book collection efficiently</p>
+        </div>
     </header>
 
-    <main>
-        <!-- Form -->
-        <section class="card">
-            <h2 id="formTitle">Add New Book</h2>
-            <form id="bookForm">
-                <input type="hidden" id="bookId">
-                <input type="text" id="title" placeholder="Title" required>
-                <input type="text" id="author" placeholder="Author" required>
-                <input type="text" id="isbn" placeholder="ISBN (10 or 13 digits)" required>
-                <input type="text" id="category" placeholder="Category" required>
-                <input type="number" id="totalCopies" placeholder="Total Copies" min="1" required>
-                <input type="number" id="availableCopies" placeholder="Available Copies" min="0" required>
-                <div class="actions">
-                    <button type="submit" class="btn primary">Save</button>
-                    <button type="button" class="btn secondary" onclick="resetForm()">Reset</button>
+    <!-- ========== MAIN CONTAINER ========== -->
+    <main class="container">
+
+        <!-- ========== STATS GRID ========== -->
+        <section class="stats-grid" aria-label="Library statistics">
+            <div class="stat-card stat-total">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Books</span>
+                    <span class="stat-value" id="statTotal">0</span>
                 </div>
-            </form>
+            </div>
+            <div class="stat-card stat-available">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-label">Available</span>
+                    <span class="stat-value" id="statAvailable">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-out">
+                <div class="stat-icon">📕</div>
+                <div class="stat-info">
+                    <span class="stat-label">Out of Stock</span>
+                    <span class="stat-value" id="statOut">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-categories">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-info">
+                    <span class="stat-label">Categories</span>
+                    <span class="stat-value" id="statCategories">0</span>
+                </div>
+            </div>
         </section>
 
-        <!-- Book List -->
-        <section class="card">
-            <h2>All Books</h2>
-            <div id="bookList" class="book-list">Loading...</div>
-        </section>
+        <!-- ========== TWO-COLUMN LAYOUT ========== -->
+        <div class="layout">
+
+            <!-- LEFT: Form Panel -->
+            <aside class="panel form-panel">
+                <div class="panel-header">
+                    <h2 id="formTitle">Add New Book</h2>
+                    <button type="button" id="cancelEditBtn" class="btn-icon btn-ghost hidden" aria-label="Cancel edit">✕</button>
+                </div>
+
+                <form id="bookForm" class="book-form">
+                    <input type="hidden" id="bookId">
+
+                    <div class="form-group">
+                        <label for="title">Title <span class="required">*</span></label>
+                        <input type="text" id="title" placeholder="e.g., Clean Code" required minlength="1" maxlength="200">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="author">Author <span class="required">*</span></label>
+                        <input type="text" id="author" placeholder="e.g., Robert Martin" required minlength="2" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isbn">ISBN <span class="required">*</span></label>
+                        <input type="text" id="isbn" placeholder="10 or 13 digits" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category <span class="required">*</span></label>
+                        <input type="text" id="category" placeholder="e.g., Programming" required list="categoryList">
+                        <datalist id="categoryList">
+                            <option value="Programming">
+                            <option value="Fiction">
+                            <option value="Science">
+                            <option value="History">
+                            <option value="Business">
+                            <option value="Biography">
+                        </datalist>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="totalCopies">Total Copies <span class="required">*</span></label>
+                            <input type="number" id="totalCopies" placeholder="5" min="1" max="1000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="availableCopies">Available <span class="required">*</span></label>
+                            <input type="number" id="availableCopies" placeholder="5" min="0" max="1000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span id="submitBtnText">Add Book</span>
+                        </button>
+                        <button type="reset" class="btn btn-ghost" onclick="resetForm()">Reset</button>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- RIGHT: Books Panel -->
+            <section class="panel list-panel">
+                <div class="panel-header">
+                    <h2>All Books <span class="count-badge" id="bookCount">0</span></h2>
+                </div>
+
+                <!-- Search + Filter -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN...">
+                    </div>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="availabilityFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="out">Out of Stock</option>
+                    </select>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p>Loading books...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon">📭</div>
+                    <h3>No books found</h3>
+                    <p>Add your first book to get started!</p>
+                </div>
+
+                <!-- Book List -->
+                <div id="bookList" class="book-list"></div>
+            </section>
+        </div>
     </main>
 
-    <div id="toast" class="toast"></div>
+    <!-- ========== TOAST ========== -->
+    <div id="toast" class="toast hidden" role="alert"></div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <p>&copy; 2025 BorrowBox &middot; Built with Spring Boot + MongoDB</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
