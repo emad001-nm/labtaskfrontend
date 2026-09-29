@@ -1,185 +1,585 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="BorrowBox — Modern library management system">
-    <title>BorrowBox — Library Management</title>
+    <meta name="description" content="BorrowBox — Enterprise-Grade Modern Library & Circulation Management System">
+    <meta name="theme-color" content="#4f46e5">
+    <title>BorrowBox — Modern Library Management</title>
+    
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ========== NAVBAR ========== -->
-    <nav class="navbar">
+    <!-- ========== GLOBAL NAVBAR ========== -->
+    <header class="navbar">
         <div class="nav-container">
             <div class="nav-brand">
-                <div class="brand-icon">📚</div>
-                <div class="brand-text">
-                    <span class="brand-name">BorrowBox</span>
-                    <span class="brand-tagline">Library Management</span>
+                <div class="brand-logo" aria-hidden="true">
+                    <svg class="brand-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                        <path d="M6 6h10"/>
+                        <path d="M6 10h10"/>
+                        <path d="M6 14h6"/>
+                    </svg>
+                    <span class="logo-sparkle"></span>
+                </div>
+                <div class="brand-meta">
+                    <div class="brand-title-row">
+                        <span class="brand-name">BorrowBox</span>
+                        <span class="brand-pill">PRO v2.0</span>
+                    </div>
+                    <span class="brand-subtitle">Library Operations & Circulation</span>
                 </div>
             </div>
-            <div class="nav-status">
-                <span id="apiStatus" class="status-dot offline"></span>
-                <span id="apiStatusText">Connecting...</span>
-            </div>
-        </div>
-    </nav>
 
-    <!-- ========== HERO HEADER ========== -->
-    <header class="hero">
-        <div class="hero-content">
-            <h1>Library Dashboard</h1>
-            <p>Manage your book collection efficiently</p>
+            <div class="nav-actions">
+                <!-- API Connection Badge -->
+                <div class="api-badge-wrapper" id="apiBadgeWrapper">
+                    <button type="button" class="api-status-btn" id="apiStatusBtn" title="Click to view or switch API backend" aria-label="API connection status">
+                        <span id="apiStatus" class="status-indicator-dot offline"></span>
+                        <span id="apiStatusText" class="api-label">Connecting...</span>
+                        <svg class="icon-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <!-- API Switcher Popover -->
+                    <div class="api-popover hidden" id="apiPopover">
+                        <div class="api-popover-header">
+                            <span class="popover-title">Backend Connection</span>
+                            <span class="latency-chip" id="apiLatency">Checking...</span>
+                        </div>
+                        <div class="api-popover-body">
+                            <label class="api-option">
+                                <input type="radio" name="apiEndpoint" value="production" id="apiRadioProd" checked>
+                                <div class="option-info">
+                                    <strong>Cloud Backend</strong>
+                                    <span>labtaskbackend.onrender.com</span>
+                                </div>
+                            </label>
+                            <label class="api-option">
+                                <input type="radio" name="apiEndpoint" value="local" id="apiRadioLocal">
+                                <div class="option-info">
+                                    <strong>Local Backend</strong>
+                                    <span>http://localhost:8080</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="api-popover-footer">
+                            <button type="button" class="btn-xs btn-outline" id="reconnectApiBtn">
+                                <svg class="btn-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                                Test & Reconnect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Catalog Button -->
+                <div class="export-dropdown-wrapper">
+                    <button type="button" class="nav-btn" id="exportBtn" title="Export catalog to CSV or JSON" aria-label="Export catalog">
+                        <svg class="nav-btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span class="nav-btn-text">Export</span>
+                    </button>
+                    <div class="export-menu hidden" id="exportMenu">
+                        <button type="button" class="export-item" onclick="exportCatalog('csv')">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            Export as CSV (Excel)
+                        </button>
+                        <button type="button" class="export-item" onclick="exportCatalog('json')">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                            Export as JSON
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Toggle theme (Light/Dark)" aria-label="Toggle theme">
+                    <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                    </svg>
+                    <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+
+                <!-- Primary Add Book Button -->
+                <button type="button" class="btn btn-primary btn-header-cta" id="openAddModalBtn">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>New Book</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- ========== MAIN CONTAINER ========== -->
-    <main class="container">
+    <!-- ========== HERO DASHBOARD OVERVIEW ========== -->
+    <section class="dashboard-hero">
+        <div class="hero-inner">
+            <div class="hero-text-block">
+                <div class="hero-greeting">
+                    <span class="greeting-badge">Live Catalog Active</span>
+                    <span class="hero-date" id="heroLiveDate"></span>
+                </div>
+                <h1 class="hero-headline">Library Management Dashboard</h1>
+                <p class="hero-description">Track real-time circulation, manage inventory, and seamlessly execute book loans and returns.</p>
+            </div>
 
-        <!-- ========== STATS GRID ========== -->
-        <section class="stats-grid" aria-label="Library statistics">
-            <div class="stat-card stat-total">
-                <div class="stat-icon">📚</div>
-                <div class="stat-info">
-                    <span class="stat-label">Total Books</span>
-                    <span class="stat-value" id="statTotal">0</span>
+            <div class="hero-quick-tools">
+                <button type="button" class="quick-tool-btn" id="refreshCatalogBtn" title="Refresh data from server">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                    <span>Sync</span>
+                </button>
+                <div class="search-shortcut-hint" onclick="focusSearch()">
+                    <span class="key-hint">/</span>
+                    <span class="hint-label">Quick Search</span>
                 </div>
             </div>
-            <div class="stat-card stat-available">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                    <span class="stat-label">Available</span>
-                    <span class="stat-value" id="statAvailable">0</span>
-                </div>
-            </div>
-            <div class="stat-card stat-out">
-                <div class="stat-icon">📕</div>
-                <div class="stat-info">
-                    <span class="stat-label">Out of Stock</span>
-                    <span class="stat-value" id="statOut">0</span>
-                </div>
-            </div>
-            <div class="stat-card stat-categories">
-                <div class="stat-icon">🏷️</div>
-                <div class="stat-info">
-                    <span class="stat-label">Categories</span>
-                    <span class="stat-value" id="statCategories">0</span>
-                </div>
-            </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- ========== TWO-COLUMN LAYOUT ========== -->
-        <div class="layout">
+    <!-- ========== MAIN APP WRAPPER ========== -->
+    <main class="main-content">
+        <div class="content-container">
 
-            <!-- LEFT: Form Panel -->
-            <aside class="panel form-panel">
-                <div class="panel-header">
-                    <h2 id="formTitle">Add New Book</h2>
-                    <button type="button" id="cancelEditBtn" class="btn-icon btn-ghost hidden" aria-label="Cancel edit">✕</button>
-                </div>
-
-                <form id="bookForm" class="book-form">
-                    <input type="hidden" id="bookId">
-
-                    <div class="form-group">
-                        <label for="title">Title <span class="required">*</span></label>
-                        <input type="text" id="title" placeholder="e.g., Clean Code" required minlength="1" maxlength="200">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="author">Author <span class="required">*</span></label>
-                        <input type="text" id="author" placeholder="e.g., Robert Martin" required minlength="2" maxlength="100">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="isbn">ISBN <span class="required">*</span></label>
-                        <input type="text" id="isbn" placeholder="10 or 13 digits" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="category">Category <span class="required">*</span></label>
-                        <input type="text" id="category" placeholder="e.g., Programming" required list="categoryList">
-                        <datalist id="categoryList">
-                            <option value="Programming">
-                            <option value="Fiction">
-                            <option value="Science">
-                            <option value="History">
-                            <option value="Business">
-                            <option value="Biography">
-                        </datalist>
-                    </div>
-
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label for="totalCopies">Total Copies <span class="required">*</span></label>
-                            <input type="number" id="totalCopies" placeholder="5" min="1" max="1000" required>
+            <!-- ========== KPI STATS SECTION ========== -->
+            <section class="stats-overview" aria-label="Library catalog statistics">
+                <!-- Card 1: Total Books -->
+                <div class="kpi-card kpi-total">
+                    <div class="kpi-card-inner">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Total Catalog</span>
+                            <div class="kpi-icon-badge total-badge" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                                    <path d="M6 6h10"/><path d="M6 10h10"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="availableCopies">Available <span class="required">*</span></label>
-                            <input type="number" id="availableCopies" placeholder="5" min="0" max="1000" required>
+                        <div class="kpi-figure">
+                            <span class="kpi-num" id="statTotal">0</span>
+                            <span class="kpi-unit">titles</span>
+                        </div>
+                        <div class="kpi-footer">
+                            <span class="kpi-micro-stat" id="statTotalCopiesSum">0 total copies tracked</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <span id="submitBtnText">Add Book</span>
+                <!-- Card 2: Available Copies -->
+                <div class="kpi-card kpi-available">
+                    <div class="kpi-card-inner">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Available for Loan</span>
+                            <div class="kpi-icon-badge available-badge" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-figure">
+                            <span class="kpi-num" id="statAvailable">0</span>
+                            <span class="kpi-unit">in stock</span>
+                        </div>
+                        <div class="kpi-footer">
+                            <div class="kpi-meter-bar">
+                                <div class="meter-fill" id="statAvailableMeter" style="width: 0%"></div>
+                            </div>
+                            <span class="kpi-micro-stat" id="statAvailableRate">0% in stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Out of Stock -->
+                <div class="kpi-card kpi-out">
+                    <div class="kpi-card-inner">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Depleted / Loaned</span>
+                            <div class="kpi-icon-badge out-badge" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="15" y1="9" x2="9" y2="15"/>
+                                    <line x1="9" y1="9" x2="15" y2="15"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-figure">
+                            <span class="kpi-num" id="statOut">0</span>
+                            <span class="kpi-unit">out of stock</span>
+                        </div>
+                        <div class="kpi-footer">
+                            <span class="kpi-micro-stat" id="statOutSubtitle">0 titles require return</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Categories -->
+                <div class="kpi-card kpi-categories">
+                    <div class="kpi-card-inner">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Genres & Categories</span>
+                            <div class="kpi-icon-badge categories-badge" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m3.85 8.62 4.9-4.9a1.5 1.5 0 0 1 2.12 0l9.9 9.9a1.5 1.5 0 0 1 0 2.12l-4.9 4.9a1.5 1.5 0 0 1-2.12 0l-9.9-9.9a1.5 1.5 0 0 1 0-2.12z"/>
+                                    <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-figure">
+                            <span class="kpi-num" id="statCategories">0</span>
+                            <span class="kpi-unit">genres</span>
+                        </div>
+                        <div class="kpi-footer">
+                            <span class="kpi-micro-stat">Diversified library</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== CATALOG CONTROL BAR (SEARCH, FILTERS, VIEWS) ========== -->
+            <section class="control-panel">
+                <div class="control-panel-inner">
+                    <!-- Left: Search Box -->
+                    <div class="search-wrapper">
+                        <div class="search-input-box">
+                            <svg class="search-icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.3-4.3"/>
+                            </svg>
+                            <input type="text" id="searchInput" placeholder="Search by title, author name, or ISBN..." autocomplete="off">
+                            <button type="button" class="btn-clear-search hidden" id="clearSearchBtn" aria-label="Clear search">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Filters & View Switcher -->
+                    <div class="filters-group">
+                        <!-- Category Filter -->
+                        <div class="select-wrapper">
+                            <svg class="select-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m3.85 8.62 4.9-4.9a1.5 1.5 0 0 1 2.12 0l9.9 9.9a1.5 1.5 0 0 1 0 2.12l-4.9 4.9a1.5 1.5 0 0 1-2.12 0l-9.9-9.9a1.5 1.5 0 0 1 0-2.12z"/></svg>
+                            <select id="categoryFilter" class="filter-select" aria-label="Filter by category">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+
+                        <!-- Availability Filter -->
+                        <div class="select-wrapper">
+                            <svg class="select-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <select id="availabilityFilter" class="filter-select" aria-label="Filter by stock status">
+                                <option value="">All Availability</option>
+                                <option value="available">In Stock Only</option>
+                                <option value="out">Out of Stock Only</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort By Filter -->
+                        <div class="select-wrapper">
+                            <svg class="select-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+                            <select id="sortBySelect" class="filter-select" aria-label="Sort books by">
+                                <option value="default">Default Order</option>
+                                <option value="title-asc">Title (A → Z)</option>
+                                <option value="title-desc">Title (Z → A)</option>
+                                <option value="author-asc">Author (A → Z)</option>
+                                <option value="copies-desc">Most Copies</option>
+                                <option value="available-desc">Highest Stock</option>
+                            </select>
+                        </div>
+
+                        <!-- Reset Filters Button -->
+                        <button type="button" class="btn-reset-filters hidden" id="resetFiltersBtn" title="Reset all search filters">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            <span>Reset</span>
                         </button>
-                        <button type="reset" class="btn btn-ghost" onclick="resetForm()">Reset</button>
-                    </div>
-                </form>
-            </aside>
 
-            <!-- RIGHT: Books Panel -->
-            <section class="panel list-panel">
-                <div class="panel-header">
-                    <h2>All Books <span class="count-badge" id="bookCount">0</span></h2>
+                        <!-- Layout View Switcher -->
+                        <div class="view-toggle" role="group" aria-label="Catalog layout view">
+                            <button type="button" class="view-btn active" id="viewGridBtn" title="Switch to Grid View" aria-label="Grid View">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="7" height="7" x="3" y="3" rx="1"/>
+                                    <rect width="7" height="7" x="14" y="3" rx="1"/>
+                                    <rect width="7" height="7" x="14" y="14" rx="1"/>
+                                    <rect width="7" height="7" x="3" y="14" rx="1"/>
+                                </svg>
+                            </button>
+                            <button type="button" class="view-btn" id="viewTableBtn" title="Switch to Table / List View" aria-label="Table View">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="8" y1="6" x2="21" y2="6"/>
+                                    <line x1="8" y1="12" x2="21" y2="12"/>
+                                    <line x1="8" y1="18" x2="21" y2="18"/>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Search + Filter -->
-                <div class="filter-bar">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="Search by title, author, or ISBN...">
+                <!-- Active Filter Tags & Count Bar -->
+                <div class="catalog-summary-bar">
+                    <div class="catalog-count-info">
+                        Showing <strong id="bookCount">0</strong> books in catalog
                     </div>
-                    <select id="categoryFilter" class="filter-select">
-                        <option value="">All Categories</option>
-                    </select>
-                    <select id="availabilityFilter" class="filter-select">
-                        <option value="">All Status</option>
-                        <option value="available">Available</option>
-                        <option value="out">Out of Stock</option>
-                    </select>
+                    <div class="active-chips-container" id="activeFilterChips"></div>
                 </div>
+            </section>
 
-                <!-- Loading State -->
-                <div id="loadingState" class="loading-state hidden">
-                    <div class="spinner"></div>
-                    <p>Loading books...</p>
+            <!-- ========== MAIN BOOK CATALOG SECTION ========== -->
+            <section class="catalog-section" aria-label="Book collection catalog">
+
+                <!-- Skeleton Loading Shimmer State -->
+                <div id="loadingState" class="skeleton-grid hidden" aria-live="polite">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
                 </div>
 
                 <!-- Empty State -->
-                <div id="emptyState" class="empty-state hidden">
-                    <div class="empty-icon">📭</div>
-                    <h3>No books found</h3>
-                    <p>Add your first book to get started!</p>
+                <div id="emptyState" class="empty-state-box hidden">
+                    <div class="empty-state-graphic">
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                            <path d="M10 10l4 4m0-4l-4 4"/>
+                        </svg>
+                    </div>
+                    <h3 class="empty-heading">No books match your criteria</h3>
+                    <p class="empty-subtext">Try refining your search keywords, clearing applied filters, or register a new book to the library.</p>
+                    <div class="empty-actions">
+                        <button type="button" class="btn btn-outline" onclick="clearAllFilters()">Clear Filters</button>
+                        <button type="button" class="btn btn-primary" onclick="openAddModal()">Add New Book</button>
+                    </div>
                 </div>
 
-                <!-- Book List -->
-                <div id="bookList" class="book-list"></div>
+                <!-- Book List / Grid View Container -->
+                <div id="bookList" class="book-grid-layout"></div>
+
+                <!-- Table View Container -->
+                <div id="bookTableContainer" class="table-responsive-wrapper hidden">
+                    <table class="catalog-table">
+                        <thead>
+                            <tr>
+                                <th>Book &amp; Details</th>
+                                <th>Category</th>
+                                <th>ISBN</th>
+                                <th>Stock &amp; Availability</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookTableBody"></tbody>
+                    </table>
+                </div>
             </section>
         </div>
     </main>
 
-    <!-- ========== TOAST ========== -->
-    <div id="toast" class="toast hidden" role="alert"></div>
+    <!-- ========== ADD / EDIT BOOK SLIDE-OVER DRAWER MODAL ========== -->
+    <div class="drawer-backdrop hidden" id="bookModalBackdrop" onclick="handleDrawerBackdropClick(event)">
+        <aside class="drawer-panel" id="bookDrawer" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+            <div class="drawer-header">
+                <div class="drawer-title-box">
+                    <div class="drawer-title-icon" id="drawerTitleIcon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    </div>
+                    <div>
+                        <h2 id="formTitle">Add New Book</h2>
+                        <p class="drawer-subtitle">Fill in the catalog details and stock limits below</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-drawer-close" id="cancelEditBtn" onclick="closeBookModal()" aria-label="Close modal">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Live Preview Card inside Drawer -->
+            <div class="drawer-preview-section">
+                <span class="preview-tag">LIVE CARD PREVIEW</span>
+                <div class="preview-mini-card" id="formLivePreviewCard">
+                    <div class="preview-spine" id="previewSpine"></div>
+                    <div class="preview-body">
+                        <div class="preview-badge-row">
+                            <span class="preview-category-chip" id="previewCategory">Category</span>
+                            <span class="preview-stock-pill" id="previewStock">5 Available</span>
+                        </div>
+                        <h4 class="preview-book-title" id="previewTitle">Book Title Appears Here</h4>
+                        <p class="preview-book-author" id="previewAuthor">by Author Name</p>
+                        <div class="preview-meta-row">
+                            <span id="previewIsbn">ISBN: 978-0-000000-0-0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form id="bookForm" class="drawer-form" novalidate>
+                <input type="hidden" id="bookId">
+
+                <div class="form-field">
+                    <label for="title">Book Title <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/></svg>
+                        <input type="text" id="title" placeholder="e.g. Clean Code: A Handbook of Agile" required minlength="1" maxlength="200" autocomplete="off">
+                    </div>
+                    <span class="field-hint">Full publication title</span>
+                </div>
+
+                <div class="form-field">
+                    <label for="author">Author Name <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="author" placeholder="e.g. Robert C. Martin" required minlength="2" maxlength="100" autocomplete="off">
+                    </div>
+                    <span class="field-hint">Primary author or contributing editors</span>
+                </div>
+
+                <div class="form-field">
+                    <label for="isbn">ISBN (10 or 13 digits) <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
+                        <input type="text" id="isbn" placeholder="e.g. 9780132350884" required pattern="[0-9Xx\-]{10,17}" autocomplete="off">
+                    </div>
+                    <span class="field-hint">Standard International Book Number identifier</span>
+                </div>
+
+                <div class="form-field">
+                    <label for="category">Category / Genre <span class="required">*</span></label>
+                    <div class="input-with-icon">
+                        <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3.85 8.62 4.9-4.9a1.5 1.5 0 0 1 2.12 0l9.9 9.9a1.5 1.5 0 0 1 0 2.12l-4.9 4.9a1.5 1.5 0 0 1-2.12 0l-9.9-9.9a1.5 1.5 0 0 1 0-2.12z"/></svg>
+                        <input type="text" id="category" placeholder="e.g. Programming" required list="categoryList" autocomplete="off">
+                    </div>
+                    <datalist id="categoryList">
+                        <option value="Programming">
+                        <option value="Software Engineering">
+                        <option value="Fiction">
+                        <option value="Science">
+                        <option value="History">
+                        <option value="Business">
+                        <option value="Biography">
+                        <option value="Philosophy">
+                        <option value="Psychology">
+                    </datalist>
+
+                    <!-- Quick Pick Tags -->
+                    <div class="quick-genre-tags">
+                        <button type="button" class="genre-pill" onclick="setQuickCategory('Programming')">Programming</button>
+                        <button type="button" class="genre-pill" onclick="setQuickCategory('Software Engineering')">Software Eng</button>
+                        <button type="button" class="genre-pill" onclick="setQuickCategory('Fiction')">Fiction</button>
+                        <button type="button" class="genre-pill" onclick="setQuickCategory('Science')">Science</button>
+                        <button type="button" class="genre-pill" onclick="setQuickCategory('Business')">Business</button>
+                    </div>
+                </div>
+
+                <div class="form-columns-2">
+                    <div class="form-field">
+                        <label for="totalCopies">Total Copies <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="18" x="3" y="3" rx="1"/><rect width="8" height="18" x="13" y="3" rx="1"/></svg>
+                            <input type="number" id="totalCopies" placeholder="5" min="1" max="5000" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="availableCopies">Available Now <span class="required">*</span></label>
+                        <div class="input-with-icon">
+                            <svg class="field-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <input type="number" id="availableCopies" placeholder="5" min="0" max="5000" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drawer-actions">
+                    <button type="button" class="btn btn-outline" onclick="resetForm()">Reset Form</button>
+                    <button type="submit" class="btn btn-primary btn-save" id="submitBtn">
+                        <svg class="btn-spinner hidden" id="submitSpinner" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                        <span id="submitBtnText">Add Book</span>
+                    </button>
+                </div>
+            </form>
+        </aside>
+    </div>
+
+    <!-- ========== BOOK DETAILS QUICK-VIEW MODAL ========== -->
+    <div class="modal-backdrop hidden" id="detailsModalBackdrop" onclick="handleModalBackdropClick(event, 'detailsModalBackdrop')">
+        <div class="modal-dialog modal-md" role="dialog" aria-modal="true" aria-labelledby="detailsModalTitle">
+            <div class="modal-header">
+                <span class="modal-tag">BOOK DETAILS</span>
+                <button type="button" class="btn-modal-close" onclick="closeDetailsModal()" aria-label="Close modal">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="detailsModalContent">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DELETE CONFIRMATION DIALOG MODAL ========== -->
+    <div class="modal-backdrop hidden" id="deleteModalBackdrop" onclick="handleModalBackdropClick(event, 'deleteModalBackdrop')">
+        <div class="modal-dialog modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+            <div class="delete-icon-alert">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h3 class="modal-title" id="deleteModalTitle">Delete This Book?</h3>
+            <p class="modal-desc">
+                Are you sure you want to delete <strong id="deleteBookName">this book</strong> from the library registry? This action cannot be undone.
+            </p>
+            <div class="modal-button-row">
+                <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteBook()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    <span>Delete Book</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TOAST NOTIFICATION CONTAINER ========== -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite">
+        <div class="toast-icon-wrap" id="toastIcon"></div>
+        <div class="toast-body">
+            <span class="toast-message" id="toastMsg"></span>
+        </div>
+        <button type="button" class="toast-close" onclick="hideToast()" aria-label="Dismiss notification">&times;</button>
+        <div class="toast-progress-bar" id="toastProgress"></div>
+    </div>
 
     <!-- ========== FOOTER ========== -->
-    <footer class="footer">
-        <p>&copy; 2025 BorrowBox &middot; Built with Spring Boot + MongoDB</p>
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="footer-logo">BorrowBox</span>
+                    <span class="footer-tag">Modern Library Operations</span>
+                </div>
+                <p class="footer-copy">&copy; 2026 BorrowBox &middot; Enterprise Circulation Management System</p>
+            </div>
+            <div class="footer-right">
+                <div class="stack-tags">
+                    <span class="tech-chip">Spring Boot</span>
+                    <span class="tech-chip">MongoDB Atlas</span>
+                    <span class="tech-chip">Vanilla JS</span>
+                    <span class="tech-chip">Render Cloud</span>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
